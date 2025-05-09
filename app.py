@@ -26,6 +26,10 @@ def index():
 def predict():
     try:
         inputs = [float(request.form.get(oil, 0)) for oil in oil_names]
+        total = sum(inputs)
+        if total > 100:
+            return render_template('index.html', prediction="Tổng tỷ lệ dầu vượt quá 100%", oil_names=oil_names)
+
         X = np.array(inputs).reshape(1, -1)
         predicted_ph = model.predict(X)[0]
         return render_template('index.html', prediction=round(predicted_ph, 2), oil_names=oil_names)
