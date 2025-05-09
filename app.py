@@ -25,7 +25,13 @@ def index():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        inputs = [float(request.form.get(oil, 0)) for oil in oil_names]
+        inputs = []
+        for oil in oil_names:
+            value = request.form.get(oil, '')
+            if value.strip() == '':
+                value = 0
+            inputs.append(float(value))
+
         total = sum(inputs)
         if total > 100:
             return render_template('index.html', prediction="Tổng tỷ lệ dầu vượt quá 100%", oil_names=oil_names)
