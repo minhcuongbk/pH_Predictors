@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dự đoán pH theo tỷ lệ dầu thô</title>
+</head>
+<body>
+    <h2>Nhập tỷ lệ các loại dầu thô (%)</h2>
+    <form action="/predict" method="post">
+        {% for oil in [
+            'BACH HO', 'BONNY LT', 'Heavy Bach Ho', 'YELLOW TUNA', 'KIMANIS', 'AMNA', 'QUA IBOE',
+            'MURBAN', 'MIRI LT', 'BUNGA ORKID', 'KIKEH', 'CABINDA', 'RABI BLEND', 'RABI LIGHT',
+            'BERTAM', 'CHAMPION', 'DAI HUNG', 'LABUAN', 'RUBY', 'TE GIAC TRANG', 'AZERI LT',
+            "N'KOSSA", 'RANG DONG', 'CHIM SAO', 'THANG LONG', 'SOKOL', 'HAI THACH', 'SU TU DEN',
+            'ESPO', 'WTI', 'SONG DOC', 'BU ATTIFEL', 'MINAS', 'PALANCA', 'FORCADOS',
+            'SLOPS', 'CDU RESIDUE'
+        ] %}
+            <label for="{{ oil }}">{{ oil }}:</label>
+            <input type="number" step="any" name="{{ oil }}"><br><br>
+        {% endfor %}
+        <button type="submit">Dự đoán pH</button>
+    </form>
+
+    {% if prediction %}
+        <h3>Kết quả pH dự đoán: {{ prediction }}</h3>
+    {% endif %}
+</body>
+</html>
