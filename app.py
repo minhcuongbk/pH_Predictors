@@ -43,37 +43,50 @@ def predict():
     except Exception as e:
         return render_template('index.html', prediction=f"Lỗi: {e}", oil_names=oil_names)
 
-@app.route('/trend', methods=['POST'])
+@app.route('/trend', methods=['GET', 'POST'])
 def trend():
+    if request.method == 'GET':
+        return render_template('trend_input.html')
+
     try:
         start_str = request.form.get('start_date')
         end_str = request.form.get('end_date')
         start_date = datetime.strptime(start_str, '%Y-%m-%d')
         end_date = datetime.strptime(end_str, '%Y-%m-%d')
 
+        # Tạo danh sách ngày theo tuần
+        date_list = []
         current_date = start_date
-        trend_data = []
-
         while current_date <= end_date:
-            inputs = []
-            for oil in oil_names:
-                key = f"{oil}_{current_date.strftime('%Y-%m-%d')}"
-                value = request.form.get(key, '')
-                if value.strip() == '':
-                    value = 0
-                inputs.append(float(value))
-            total = sum(inputs)
-            if total > 100:
-                return render_template('index.html', prediction="Tổng tỷ lệ ngày {} vượt quá 100%".format(current_date.strftime('%d-%m-%Y')), oil_names=oil_names)
-
-            X = np.array(inputs).reshape(1, -1)
-            predicted_ph = model.predict(X)[0]
-            trend_data.append({"date": current_date.strftime('%Y-%m-%d'), "ph": round(predicted_ph, 2)})
+            date_list.append(current_date.strftime('%Y-%m-%d'))
             current_date += timedelta(days=7)
 
-        return render_template('trend.html', trend_data=trend_data)
+        # Nếu là POST có dữ liệu dự đoán (submit lần 2)
+        if 'predict_trend' in request.form:
+            trend_data = []
+            for date in date_list:
+                inputs = []
+                for oil in oil_names:
+                    key = f"{oil}_{date}"
+                    value = request.form.get(key, '')
+                    if value.strip() == '':
+                        value = 0
+                    inputs.append(float(value))
+                total = sum(inputs)
+                if total > 100:
+                    return render_template('trend_input.html', oil_names=oil_names, date_list=date_list,
+                                           error=f"Tổng tỷ lệ dầu vượt quá 100%")
+                X = np.array(inputs).reshape(1, -1)
+                predicted_ph = model.predict(X)[0]
+                trend_data.append({"date": date, "ph": round(predicted_ph, 2)})
+
+            return render_template('trend.html', trend_data=trend_data)
+
+        # Nếu mới nhập ngày → render form nhập dữ liệu theo tuần
+        return render_template('trend_input.html', oil_names=oil_names, date_list=date_list)
+
     except Exception as e:
-        return render_template('index.html', prediction=f"Lỗi: {e}", oil_names=oil_names)
+        return render_template('trend_input.html', error=f"Lỗi: {e}")
 
 if __name__ == '__main__':
     app.run(debug=True)
