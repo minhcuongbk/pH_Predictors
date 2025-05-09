@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template
 import pickle
 import numpy as np
+from datetime import datetime, timedelta
 
 # Load mô hình ML
 with open('model.pkl', 'rb') as f:
@@ -39,6 +40,38 @@ def predict():
         X = np.array(inputs).reshape(1, -1)
         predicted_ph = model.predict(X)[0]
         return render_template('index.html', prediction=round(predicted_ph, 2), oil_names=oil_names)
+    except Exception as e:
+        return render_template('index.html', prediction=f"Lỗi: {e}", oil_names=oil_names)
+
+@app.route('/trend', methods=['POST'])
+def trend():
+    try:
+        start_str = request.form.get('start_date')
+        end_str = request.form.get('end_date')
+        start_date = datetime.strptime(start_str, '%Y-%m-%d')
+        end_date = datetime.strptime(end_str, '%Y-%m-%d')
+
+        current_date = start_date
+        trend_data = []
+
+        while current_date <= end_date:
+            inputs = []
+            for oil in oil_names:
+                key = f"{oil}_{current_date.strftime('%Y-%m-%d')}"
+                value = request.form.get(key, '')
+                if value.strip() == '':
+                    value = 0
+                inputs.append(float(value))
+            total = sum(inputs)
+            if total > 100:
+                return render_template('index.html', prediction="Tổng tỷ lệ ngày {} vượt quá 100%".format(current_date.strftime('%d-%m-%Y')), oil_names=oil_names)
+
+            X = np.array(inputs).reshape(1, -1)
+            predicted_ph = model.predict(X)[0]
+            trend_data.append({"date": current_date.strftime('%Y-%m-%d'), "ph": round(predicted_ph, 2)})
+            current_date += timedelta(days=7)
+
+        return render_template('trend.html', trend_data=trend_data)
     except Exception as e:
         return render_template('index.html', prediction=f"Lỗi: {e}", oil_names=oil_names)
 
