@@ -11,11 +11,13 @@
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <div class="card shadow-lg">
-                    <div class="card-header bg-primary text-white text-center">
-                        <h2>📊 Dự đoán pH theo tỷ lệ dầu thô</h2>
+                    <div class="card-header bg-primary text-white text-center d-flex justify-content-between align-items-center">
+                        <img src="{{ url_for('static', filename='Logo BSR.jpg') }}" alt="BSR Logo" height="60">
+                        <h2 class="mb-0">📊 Dự đoán pH theo tỷ lệ dầu thô</h2>
+                        <img src="{{ url_for('static', filename='Logo thuongnn.png') }}" alt="Inspection Logo" height="60">
                     </div>
                     <div class="card-body">
-                        <form action="/predict" method="post">
+                        <form action="/predict" method="post" id="oil-form">
                             <div class="row">
                                 {% for oil in oil_names %}
                                 <div class="col-md-3 mb-3">
@@ -24,8 +26,9 @@
                                 </div>
                                 {% endfor %}
                             </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-success btn-lg mt-3">🚀 Dự đoán pH</button>
+                            <div class="d-flex gap-2 justify-content-end mt-3">
+                                <button type="reset" class="btn btn-outline-secondary">🧹 Xóa dữ liệu</button>
+                                <button type="submit" class="btn btn-success">🚀 Dự đoán pH</button>
                             </div>
                         </form>
 
